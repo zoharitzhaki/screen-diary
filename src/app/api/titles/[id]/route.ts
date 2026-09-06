@@ -39,7 +39,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const body = await request.json();
 
   const fields: string[] = [];
-  const args: unknown[] = [];
+  // חייב טיפוס ספציפי (לא unknown[]) כדי ש-libsql יקבל את זה כ-InArgs
+  // תקין. rating/notes/id הם string|number|null בפועל, ו-favorite הופך
+  // ל-0/1 למטה, אז זה מכסה את כל מה שבאמת נכנס למערך הזה.
+  const args: (string | number | null)[] = [];
   for (const key of ["rating", "notes", "favorite"] as const) {
     if (key in body) {
       fields.push(`${key} = ?`);
