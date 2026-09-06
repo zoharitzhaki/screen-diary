@@ -7,3 +7,5 @@ local.db-*
 .env.local
 .env.production
 .vercel
+migrate-to-turso.js
+check-turso.js

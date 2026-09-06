@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import "./globals.css";
@@ -6,6 +6,24 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "יומן מסך",
   description: "אפליקציה אישית למעקב אחרי סרטים וסדרות שצפיתי בהם",
+  // מאפשר "הוספה למסך הבית" באייפון שתיפתח כמו אפליקציה אמיתית, בלי
+  // סרגל הכתובת של הדפדפן (באנדרואיד/כרום זה מגיע מ-manifest.ts).
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "יומן מסך",
+  },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png" }],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0b",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
