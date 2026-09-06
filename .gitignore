@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+local.db
+local.db-*
+.env
+.env.local
+.env.production
+.vercel
