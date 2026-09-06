@@ -31,17 +31,34 @@ TMDB דורשים קרדיט: האפליקציה כבר מציגה למטה בכ
 ## שלב 2: מסד נתונים ב-Turso (חינמי)
 
 בפיתוח מקומי אפשר לדלג על זה - האפליקציה תיצור קובץ SQLite מקומי לבד.
-לפרודקשן (כדי שהאתר יהיה נגיש מהטלפון) חובה מסד נתונים אמיתי:
+לפרודקשן (כדי שהאתר יהיה נגיש מהטלפון) חובה מסד נתונים אמיתי. שתי דרכים
+לעשות את זה, שתיהן מובילות לאותה תוצאה (URL + טוקן):
+
+**אופציה א' - דרך Vercel (הכי פשוט, בלי התקנת שום דבר):** ב-Vercel יש
+אינטגרציה של Turso ב-Marketplace שמאפשרת ליצור מסד נתונים ישירות מתוך
+לוח הבקרה של Vercel ("one-click setup"), בלי CLI בכלל. עושים את זה בשלב
+4 למטה, כשמגדירים את הפרויקט ב-Vercel. **הערה**: לא הצלחתי לבדוק את
+האינטגרציה הזו בעצמי (הסביבה שבה עבדתי חסומה מבחינת רשת גם לאתר של
+Vercel וגם לזה של Turso), אז יכול להיות שהיא יוצרת משתני סביבה בשמות
+שונים מ-`TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN` שהקוד מצפה להם - אם ככה,
+אפשר לשנות את השמות בהגדרות הפרויקט ב-Vercel כדי שיתאימו, או להגיד לי
+ואני אתאים את `src/lib/db.ts`.
+
+**אופציה ב' - דרך ה-CLI של Turso:** מאומת מול התיעוד הרשמי, ומתאים גם
+להרצה מקומית. **בוינדוס אין תמיכה ישירה** - חובה WSL (ב-PowerShell כמנהל:
+`wsl --install`, ואז להריץ את הפקודות הבאות בתוך הטרמינל של WSL/אובונטו,
+לא ב-CMD/PowerShell הרגילים):
 
 ```bash
-curl -sSfL https://get.tur.so/install.sh | bash   # התקנת turso CLI (לינוקס/WSL/מק עם brew: brew install tursodatabase/tap/turso)
-turso auth signup                                  # או turso auth login אם כבר יש חשבון
+curl -sSfL https://get.tur.so/install.sh | bash   # לינוקס/WSL/מק (מק עם brew: brew install tursodatabase/tap/turso)
+turso auth signup                                  # או turso auth login אם כבר יש חשבון - פותח דפדפן
 turso db create screen-diary
 turso db show screen-diary                        # מציג את ה-URL (מתחיל ב-libsql://)
 turso db tokens create screen-diary                # יוצר טוקן גישה
 ```
 
-שימו את ה-URL וה-token ב-`.env.local` / במשתני הסביבה של Vercel.
+שימו את ה-URL וה-token ב-`.env.local` (להרצה מקומית) ו/או במשתני הסביבה
+של Vercel (לפרודקשן, ראו שלב 4).
 
 ## שלב 3: הרצה מקומית
 
@@ -56,17 +73,37 @@ npm run dev
 
 ## שלב 4: פריסה (deploy) ל-Vercel כדי שיהיה נגיש מהטלפון
 
-1. יצירת repo ב-GitHub והעלאת הקוד אליו (`git init && git add . && git commit`
-   ואז חיבור ל-repo מרוחק ו-`git push`).
-2. ב-<https://vercel.com>: New Project → מחברים את ה-repo מ-GitHub. Vercel
+**מצב נוכחי אצלכם**: התיקייה כבר הפכה ל-git repo מקומי עם commit ראשון
+(`git init`, `git add`, `git commit` כבר בוצעו). מה שנשאר הוא לחבר אותו
+ל-GitHub ולפרוס.
+
+1. יצירת repo חדש וריק ב-<https://github.com/new> (בלי README/‎.gitignore/
+   license - יש לכם כאלה כבר מקומית, כדי לא ליצור התנגשות). שם מוצע:
+   `screen-diary`. ציבורי או פרטי - זו החלטה שלכם; שימו לב שאם הוא ציבורי,
+   כל מי שרוצה יכול לראות את הקוד (לא את `.env.local`/`local.db` - אלה
+   כבר מוחרגים ב-`.gitignore` ולא ייכנסו ל-git בכלל).
+2. בטרמינל (בתיקיית הפרויקט, על המחשב שלכם - **לא** דרך Claude, כי לסביבה
+   שממנה אני עובד אין גישת רשת לאתרים האלה):
+
+   ```bash
+   git remote add origin https://github.com/<שם-המשתמש-שלכם>/screen-diary.git
+   git push -u origin main
+   ```
+
+   בפעם הראשונה זה כנראה יפתח לכם חלון דפדפן להתחברות ל-GitHub (Git
+   Credential Manager, מגיע מובנה עם Git for Windows) - מתחברים שם ו-push
+   ימשיך לבד.
+3. ב-<https://vercel.com>: New Project → מחברים את ה-repo מ-GitHub. Vercel
    מזהה אוטומטית שזה פרויקט Next.js.
-3. במסך ההגדרות, לפני הפריסה הראשונה (או אחר כך תחת Settings → Environment
-   Variables), מגדירים:
+4. מסד נתונים: באותו מסך הגדרות הפרויקט (או תחת Storage אחרי היצירה),
+   אפשר להוסיף אינטגרציית Turso מה-Marketplace של Vercel (ראו שלב 2,
+   אופציה א') - זה אמור להגדיר את משתני הסביבה של המסד אוטומטית. אם
+   הלכתם על אופציה ב' (ה-CLI), מגדירים ידנית תחת Settings → Environment
+   Variables: `TURSO_DATABASE_URL` ו-`TURSO_AUTH_TOKEN`.
+5. באותו מקום (Settings → Environment Variables) מוסיפים גם:
    - `TMDB_API_KEY`
-   - `TURSO_DATABASE_URL`
-   - `TURSO_AUTH_TOKEN`
    - `APP_PASSCODE` (מומלץ - קוד גישה משלכם, כל דבר שתבחרו)
-4. Deploy. Vercel ייתן כתובת ציבורית (משהו כמו
+6. Deploy. Vercel ייתן כתובת ציבורית (משהו כמו
    `screen-diary-xyz.vercel.app`) שנגישה מכל מקום, כולל מהטלפון.
 
 ## מבנה הפרויקט
@@ -124,6 +161,10 @@ src/
 - באותו אופן, לב (❤) ליד כל שחקן/ית או במאי/ית (בעמוד כותר, בעמוד "שחקנים
   ובמאים", ובעמוד האדם עצמו) מסמן שהוא/היא אהוב/ה עליכם. אין טבלת "אנשים"
   נפרדת באפליקציה - זו רשימה פשוטה של מזהי TMDb שסומנו.
+- "+ הוספת שחקן/ית" (בעמוד "שחקנים ובמאים") מאפשר לחפש אדם ב-TMDb ולעקוב
+  אחריו/ה עוד לפני שצפיתם באיזשהו כותר שלו/שלה - בפועל זה מסמן אותו/ה
+  כאהוב/ה, ועמוד האדם יודע לשאוב שם ותמונה ישירות מ-TMDb כשאין עדיין אף
+  כותר מקושר במסד הנתונים שלכם.
 
 ## מגבלות ידועות / רעיונות להמשך
 
