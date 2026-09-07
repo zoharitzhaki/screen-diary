@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { db, ensureSchema } from "@/lib/db";
 import { tmdbImageUrl } from "@/lib/tmdb";
-import { compareWatchedDesc, formatWatchedDate, type WatchedPrecision } from "@/lib/dates";
+import { compareWatchedDesc, formatWatchedDate, releaseYear, type WatchedPrecision } from "@/lib/dates";
 import TmdbAttribution from "@/components/TmdbAttribution";
 import FavoriteToggle from "@/components/FavoriteToggle";
 
@@ -193,7 +193,12 @@ export default async function HomePage({
                       {mediaTypeIcon(t.media_type)}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm font-medium truncate">{t.name}</p>
+                  <p className="mt-2 text-sm font-medium truncate">
+                    {t.name}
+                    {releaseYear(t.release_date) && (
+                      <span className="text-neutral-500 font-normal"> ({releaseYear(t.release_date)})</span>
+                    )}
+                  </p>
                   <p className="text-xs text-neutral-500">
                     {sortMode === "watched"
                       ? watch

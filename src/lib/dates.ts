@@ -60,3 +60,12 @@ export function compareWatchedDesc(
 // ORDER BY שקול לאותה לוגיקה, לשימוש כשממיינים בתוך SQL (למשל צפיות של
 // כותר בודד). מניח עמודות בשם year / month / day.
 export const RECENCY_ORDER_BY_DESC = "year DESC, month IS NULL, month DESC, day IS NULL, day DESC";
+
+// שנת יציאה/שידור להצגה ליד שם הכותר ברשימות (תאריך היציאה עצמו מגיע
+// כמחרוזת מלאה מ-TMDb, למשל "2020-05-01" - שולפים רק את 4 הספרות
+// הראשונות). מחזיר null אם אין תאריך יציאה בכלל, כדי שהתצוגה תדע לדלג.
+export function releaseYear(releaseDate: string | null | undefined): string | null {
+  if (!releaseDate) return null;
+  const year = releaseDate.slice(0, 4);
+  return /^\d{4}$/.test(year) ? year : null;
+}

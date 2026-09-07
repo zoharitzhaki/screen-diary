@@ -18,7 +18,14 @@ type PersonRow = {
 // person_tmdb_id כי אותו אדם יכול להופיע בכמה שורות credits (כותרים שונים).
 // בנוסף, מי שנוסף/ה ישירות דרך "הוספת שחקן" (favorite_people) בלי אף כותר
 // מקושר עדיין - מוצג/ת גם כן, עם השם והתמונה נשאבים ישירות מ-TMDb.
-export default async function PeoplePage() {
+export default async function PeoplePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ favorite?: string }>;
+}) {
+  const { favorite: favoriteParam } = await searchParams;
+  const onlyFavorites = favoriteParam === "1";
+
   await ensureSchema();
   const [creditsResult, favoritesResult] = await Promise.all([
     db.execute(
@@ -79,9 +86,10 @@ export default async function PeoplePage() {
     }
   }
 
-  const people = [...byPerson.values()].sort((a, b) => a.name.localeCompare(b.name, "he"));
+  const allPeople = [...byPerson.values()].sort((a, b) => a.name.localeCompare(b.name, "he"));
+  const people = onlyFavorites ? allPeople.filter((p) => p.favorite) : allPeople;
 
-  if (people.length === 0) {
+  if (allPeople.length === 0) {
     return (
       <div className="text-center text-neutral-400 py-20">
         <p className="mb-4">עדיין אין שחקנים או במאים ברשימה.</p>
@@ -94,12 +102,23 @@ export default async function PeoplePage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
         <h1 className="text-2xl font-semibold">שחקנים ובמאים</h1>
-        <Link href="/people/add" className="text-sm underline text-neutral-300">
-          + הוספת שחקן/ית
-        </Link>
+        <div className="flex items-center gap-4 text-sm">
+          <Link
+            href={onlyFavorites ? "/people" : "/people?favorite=1"}
+            className={onlyFavorites ? "text-red-400 font-medium" : "text-neutral-400"}
+          >
+            {onlyFavorites ? "♥ מציג רק אהובים - הצגת הכל" : "♥ רק אהובים עליי"}
+          </Link>
+          <Link href="/people/add" className="underline text-neutral-300">
+            + הוספת שחקן/ית
+          </Link>
+        </div>
       </div>
+      {people.length === 0 ? (
+        <p className="text-neutral-400 py-10 text-center">אין עדיין שחקנים/במאים שסימנת כאהובים.</p>
+      ) : (
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {people.map((p) => {
           const photo = tmdbImageUrl(p.profilePath, "w185");
@@ -136,6 +155,7 @@ export default async function PeoplePage() {
           );
         })}
       </div>
+      )}
     </div>
   );
 }

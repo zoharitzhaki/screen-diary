@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db, ensureSchema } from "@/lib/db";
 import { tmdbImageUrl, getPersonCombinedCredits, getPersonDetails } from "@/lib/tmdb";
-import { compareWatchedDesc, formatWatchedDate, type WatchedPrecision } from "@/lib/dates";
+import { compareWatchedDesc, formatWatchedDate, releaseYear, type WatchedPrecision } from "@/lib/dates";
 import TmdbAttribution from "@/components/TmdbAttribution";
 import QuickAddButton from "@/components/QuickAddButton";
 import FavoriteToggle from "@/components/FavoriteToggle";
@@ -25,6 +25,7 @@ type Appearance = {
   titleName: string;
   mediaType: string;
   posterPath: string | null;
+  releaseDate: string | null;
   roleLabel: string;
   favorite: boolean;
 };
@@ -60,6 +61,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
               t.media_type AS media_type,
               t.tmdb_id AS tmdb_id,
               t.poster_path AS title_poster_path,
+              t.release_date AS release_date,
               t.favorite AS favorite
             FROM credits c
             JOIN titles t ON t.id = c.title_id
@@ -124,6 +126,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
         titleName: row["title_name"] as string,
         mediaType: row["media_type"] as string,
         posterPath: row["title_poster_path"] as string | null,
+        releaseDate: row["release_date"] as string | null,
         roleLabel,
         favorite: Boolean(row["favorite"]),
       });
@@ -231,7 +234,12 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
                     {mediaTypeIcon(a.mediaType)}
                   </span>
                 </div>
-                <p className="mt-2 text-sm font-medium truncate">{a.titleName}</p>
+                <p className="mt-2 text-sm font-medium truncate">
+                  {a.titleName}
+                  {releaseYear(a.releaseDate) && (
+                    <span className="text-neutral-500 font-normal"> ({releaseYear(a.releaseDate)})</span>
+                  )}
+                </p>
                 <p className="text-xs text-neutral-500 truncate">{a.roleLabel}</p>
                 <p className="text-xs text-neutral-600 truncate">
                   {watch ? formatWatchedDate(watch) : "לא צוין תאריך צפייה"}
@@ -268,7 +276,12 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
                       {mediaTypeIcon(f.mediaType)}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm font-medium truncate">{f.name}</p>
+                  <p className="mt-2 text-sm font-medium truncate">
+                    {f.name}
+                    {releaseYear(f.releaseDate) && (
+                      <span className="text-neutral-500 font-normal"> ({releaseYear(f.releaseDate)})</span>
+                    )}
+                  </p>
                   <p className="text-xs text-neutral-500 truncate">{f.roleLabel}</p>
                   <QuickAddButton tmdbId={f.id} mediaType={f.mediaType} />
                 </div>
