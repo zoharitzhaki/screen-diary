@@ -11,7 +11,7 @@ export async function GET() {
   await ensureSchema();
 
   const [titlesResult, watchResult, creditsResult, favoritesResult] = await Promise.all([
-    db.execute("SELECT id, name, media_type, created_at FROM titles ORDER BY id DESC LIMIT 15"),
+    db.execute("SELECT id, name, media_type, created_at, rating, notes, favorite FROM titles ORDER BY id DESC LIMIT 15"),
     db.execute("SELECT id, title_id, year, month, day, created_at FROM watch_events ORDER BY id DESC LIMIT 10"),
     db.execute("SELECT id, title_id, name, role, sort_order FROM credits ORDER BY id DESC LIMIT 10"),
     db.execute("SELECT person_tmdb_id, created_at FROM favorite_people ORDER BY created_at DESC LIMIT 10"),
@@ -27,6 +27,9 @@ export async function GET() {
       name: r["name"],
       media_type: r["media_type"],
       created_at: r["created_at"],
+      rating: r["rating"],
+      notes: r["notes"],
+      favorite: r["favorite"],
     })),
     recentWatchEvents: watchResult.rows.map((r) => ({
       id: r["id"],
