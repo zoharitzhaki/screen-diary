@@ -3,8 +3,18 @@ import { createClient } from "@libsql/client";
 // שימוש ב-|| ולא ב-?? בכוונה: אם TURSO_DATABASE_URL קיים בקובץ .env אבל ריק
 // (למשל "TURSO_DATABASE_URL=" בלי ערך), process.env נותן מחרוזת ריקה ולא
 // undefined, ו-?? לא היה תופס את זה - היינו מנסים להתחבר לכתובת ריקה.
-const url = process.env.TURSO_DATABASE_URL || "file:./local.db";
-const authToken = process.env.TURSO_AUTH_TOKEN || undefined;
+//
+// חשוב: משתני TURSO_DATABASE_URL/TURSO_AUTH_TOKEN הרגילים מנוהלים ע"י
+// אינטגרציית Turso הרשמית ב-Vercel. גילינו שבזמן ריצה בפרודקשן הם
+// מוחלפים בפועל בכתובת שמתחילה ב-libsql://dpl-... שמשתנה בכל דיפלוי
+// חדש ומצביעה על מסד נתונים ריק/ישן - זה גרם לאיפוס הנתונים בכל דיפלוי.
+// לכן הוספנו TURSO_DATABASE_URL_STATIC/TURSO_AUTH_TOKEN_STATIC כמשתני
+// סביבה רגילים (לא מנוהלים ע"י האינטגרציה) עם הכתובת/טוקן הקבועים של
+// מסד הנתונים האמיתי (database-cordovan-pillow), ומעדיפים אותם כאן.
+const url =
+  process.env.TURSO_DATABASE_URL_STATIC || process.env.TURSO_DATABASE_URL || "file:./local.db";
+const authToken =
+  process.env.TURSO_AUTH_TOKEN_STATIC || process.env.TURSO_AUTH_TOKEN || undefined;
 
 // בלי TURSO_DATABASE_URL האפליקציה עובדת מול קובץ SQLite מקומי (local.db) -
 // נוח לפיתוח, אבל לא נגיש מהטלפון. לפרודקשן חובה Turso (ראה README).
