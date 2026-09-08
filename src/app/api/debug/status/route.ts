@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { db, ensureSchema } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 // נתיב אבחון זמני: עוזר לוודא שהשרת בפרודקשן באמת מחובר ל-Turso (ולא נופל
 // בטעות לקובץ SQLite מקומי, שנעלם בין דיפלוי לדיפלוי בסביבת Vercel), ומראה
 // כמה כותרים קיימים בפועל וכמה מהם הוכנסו לאחרונה. מוגן ע"י אותה מידלוור
