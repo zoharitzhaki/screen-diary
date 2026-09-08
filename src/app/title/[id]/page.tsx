@@ -9,6 +9,7 @@ import EditRatingNotes from "@/components/EditRatingNotes";
 import AddWatchForm from "@/components/AddWatchForm";
 import DeleteWatchButton from "@/components/DeleteWatchButton";
 import FavoriteToggle from "@/components/FavoriteToggle";
+import AddCreditForm from "@/components/AddCreditForm";
 
 export const dynamic = "force-dynamic";
 
@@ -177,6 +178,8 @@ export default async function TitlePage({ params }: { params: Promise<{ id: stri
           />
         ))}
       </div>
+
+      <AddCreditForm titleId={title.id} />
 
       <TmdbAttribution />
     </div>
