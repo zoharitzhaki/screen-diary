@@ -17,11 +17,19 @@ export async function GET() {
     db.execute("SELECT person_tmdb_id, created_at FROM favorite_people ORDER BY created_at DESC LIMIT 10"),
   ]);
 
+  // ה-URL/טוקן שבאמת בשימוש כרגע (אותה לוגיקת עדיפות כמו ב-db.ts): מעדיפים
+  // את המשתנים הקבועים (לא מנוהלי-אינטגרציה) TURSO_DATABASE_URL_STATIC אם
+  // קיימים, ורק אם לא - נופלים חזרה למשתנה הרגיל שהאינטגרציה מזריקה.
+  const effectiveUrl =
+    process.env.TURSO_DATABASE_URL_STATIC || process.env.TURSO_DATABASE_URL || "";
+
   return NextResponse.json({
     usingTurso: Boolean(process.env.TURSO_DATABASE_URL),
     dbUrlPreview: process.env.TURSO_DATABASE_URL
       ? process.env.TURSO_DATABASE_URL.slice(0, 20) + "..."
       : "file:./local.db (fallback)",
+    hasStaticUrl: Boolean(process.env.TURSO_DATABASE_URL_STATIC),
+    effectiveUrlPreview: effectiveUrl ? effectiveUrl.slice(0, 40) + "..." : "file:./local.db (fallback)",
     recentTitles: titlesResult.rows.map((r) => ({
       id: r["id"],
       name: r["name"],
