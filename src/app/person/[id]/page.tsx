@@ -7,6 +7,7 @@ import TmdbAttribution from "@/components/TmdbAttribution";
 import QuickAddButton from "@/components/QuickAddButton";
 import FavoriteToggle from "@/components/FavoriteToggle";
 import PersonFavoriteToggle from "@/components/PersonFavoriteToggle";
+import AddTitleToPersonForm from "@/components/AddTitleToPersonForm";
 
 export const dynamic = "force-dynamic";
 
@@ -198,6 +199,12 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
           </p>
         </div>
       </div>
+
+      <AddTitleToPersonForm
+        personId={Number(id)}
+        personName={personName}
+        personProfilePath={personProfilePath}
+      />
 
       <h2 className="text-lg font-semibold mb-4">כותרים שצפית בהם</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-10">
